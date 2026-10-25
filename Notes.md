@@ -354,3 +354,70 @@ b.cpp 中guide() 函数找不到 b.o中就会把guide()地址空出来等待 Lin
 	原因：setup.bash 在写入bash 内存里的变量的时候 是在头部插入 比如: ROS_PACKAGE_PATH=新路径:$ROS_PACKAGE_PATH   # 把新路径放在前面
 	bash 在查找包的时候 会找到 第一个路径 （第一个路径找到了也就不再找了）
 	如果你改过了某一个 package 或者 你的 package 和 ros 的package 同名  你想让ros运行你工作空间的包的...那么你就得让 "source 工作空间" 在 "source ros" 后面
+### 节点管理器 ROS Master
+* 为节点提供命名和注册服务
+* 跟踪和记录话题/服务通信，辅助节点互相连接，查找
+* 提供参数服务器  一个全局的对象字典  变量名：变量值 可供每一个节点读写
+
+
+### 节点通讯
+#### 话题通讯 Topic
+* 单向传输 
+* Publisher 将数据不断的 传输到 topic 上 
+* Subscriber 订阅这个topic 不断拿到数据 
+* Message 也就是传输的内容 有一定的类型和数据结构 包括ROS提供的标准类型和用户自定义类型  用.msg文件定义
+* Message Type 也就是数据的结构
+* Subscriber 有缓冲区 也就是一个队列 如果Publisher发得太快了 就将数据push in queue 等待回调函数处理(用来处理数据的函数)
+
+#### 服务通讯 Service
+* 使用客户端/服务器 (C/S)模型 ，客户端发送请求数据 ，服务器完成处理之后返回应答数据
+* 比如： 图像处理节点 发送了一个 request （摄像机把分辨率调节至720p）  摄像机节点 将分辨率调节至720p 发送一个 Reply （调节成功）
+* .srv文件定义请求和应答的数据结构
+* 一个服务端可以被多个客户端 来进行request
+* 一个节点作为服务端就会到 Master 那里注册一个Service名称 这个变量包括了 "那个节点发出的Service" "Request/Reply(如何调用这个Service)"
+* 说人话就是：一个节点告诉Master 说 :"这里是我的电话号码（Service名称），你要以这样的格式给我打电话(Service名称里面包含的内容)" 
+
+
+### 参数 Parameter
+* ROS Master 拥有一个参数 服务器 共享的 多变量字典
+* 节点可以通过网络来访问这个服务器 
+* Talker --> 就是定义字典的节点  Talker: setParam("foo",1)   将“foo” 设置成为 int 1
+* Listener --> 就是查阅字典的节点 Listener ： getParam("foo")  拿到"foo"这个变量 的值
+* 节点用这个服务器来存储和检索 运行时的参数
+* 比较适合静态的，非二进制的配置参数 ，动态的不太行
+* 当Talker 将foo改成 2 Listener 不 getParam 就不知道 foo = 2   所以..你看动态参数不太行吧...
+
+### 功能包
+* ROS软件中基本的单元  包含节点源码 配置文件 数据定义 功能包清单(Package manifest)--> 记录功能包作者信息，许可信息，依赖选项，编译标志等
+* 功能包里可以有很多不同的节点，小乌龟turtleism 功能包里 就有telepo_key键盘节点 turtlesim节点 他们被一起打包进入一个功能包
+* 元功能包：包括多个用于统一目的的功能包 比如都是做视觉控制的： 有Camera 功能包 有数据处理功能包 有Camera驱动功能包 大家打包到一起就是 视觉元功能包
+
+### ros常用命令
+   #### roscore
+	roscore 启动 ROS Master 可以提供“节点管理器 ROS Master” 以上服务
+   #### rosrun
+	rosrun <包名> <节点名>  rosrun turtlesim turtlesim_node  运行一个节点
+	！！注意： 每一次运行rosrun 必须确保 ROS Master在 也就是 roscore --> rosrun 这个顺序不能变
+	原因：启动一个节点就得 到 Master 那里注册自己 还有启动topic 如果没有 Master在 那么无法注册也就无法通讯了
+	rosrun <包名> <节点名> 这个节点的运行会占用这个终端 你想运行其他节点得再开一个终端
+
+   #### rosnode 
+	  rosnode list 将当前ros 运行的节点 都列出来
+	  rosnode info <节点名称> 查看莫个节点的信息  Publish 了那些 topic Subscribe 了那些 topic 等信息
+   #### rostopic 
+	  rostopic list 打印出ros 里所有的话题 
+	  rostopic pub 参数 <topic名称> <Message 结构> "具体Message"   给某个topic 发送message
+	  rostopic pub -r 10 /turtle1/cmd_vel geometry_msgs/Twist "linear:  (这里-r 是rate 的意思 -r 10 就是10Hz 一秒发布10次)
+		x: 1.0
+		y: 0.0
+		z: 0.0
+		angular:
+		x: 0.0
+		y: 0.0
+		z: 1.0" 
+	  Ctrl + C 就可以停下来
+   #### rosmsg 
+	  rosmsg <Message结构>  打印出这个数据结构
+	  rosmsg geometry_msgs/Twist 查看 geometry_msgs/Twist 这个Message 的模板
+   #### rosservice
+	  rosservice list 打印出当前 Master 已注册的 service 名称
