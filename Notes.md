@@ -435,3 +435,27 @@ b.cpp 中guide() 函数找不到 b.o中就会把guide()地址空出来等待 Lin
 ### ROS 中的工作空间
    #### 工作空间的 结构
 		src : 放置所有的源码 
+		install : 安装空间
+		devel: 开发中放可执行文件和 库
+		build:	中间文件
+   #### 创建一个功能包
+		在 /root/catkin_ws/src 里面
+		catkin_creat_pkg <功能包名字> <depend1> <depend2> <depend3>
+		catkin_creat_pkg test_pkg std_msgs rospy roscpp   我的功能包名字叫作 test_pkg 它依赖 std_msgs
+   #### 知识补充！ 什么是“依赖”
+	1. 包想要正常运行 或者测试 必须要从 系统库或者别的包里面 拿东西! 比如： include<roscpp> 你在编译的时候需要这个库  需要某个包的.launch文件
+	2. .launch 文件就是 : 一个XML 格式的自动脚本 比如:你在运行这个包的的时候 要连接 另外一个包的动态库 这个库由5个节点 生成 如果你需要..就要手动打开5个终端..这太让人难过了        .launch 就可以帮你一键启动5个节点！（.launch文件里面写了启动命令） 
+	3. 什么是 XML格式文件? eXtensible Markup Language 可扩展的 标记 语言 一种用自定义标签来描述结构化数据的文本格式
+
+	4. 在那里写 depend? 在生成 package 的时候 catkin_creat_pkg test_pkg std_msgs rospy roscpp 
+
+	5. 它是如何工作的？ 在catkin_creat_pkg 的时候 你写的<depend1> <depend2> ... 会被写入package.xml 这个文件里面 
+	6.package.xml 只是一个 声明 别人在调用这个包的时候可以看到你有那些依赖
+	7. 一般的依赖: <build_depend>roscpp<build_depend/> 构建依赖 ，在我代码编译的时候需要的东西  <exec_depend>std_msgs<exec_depend/> 运行时依赖 在我代码运行时需要用到的东西  <buildtool_depend>catkin<buildtool_depend/> 在我构建系统本身时候的依赖
+	8. 这些依赖都被写入package.xml 里面 不过 这只是一个声明 ... 告诉别人我要用到这些
+	9.真正 让代码能用上这些个依赖的 是 CMakeLists！ 在它编译代码的时候 它会 find_package(catkin REQUIRED COMPONENTS roscpp) 就是去查找这个依赖的真实路径
+    10. 那它是如何查找的呢？ >> 它会去找 CMAKE_PREFIX_PATH 
+	11. CMAKE_PREFIX_PATH 是什么呢? 是一个环境变量！！！！ 通过 source 来配置的环境变量 它记录了系统库的root层级的地址(说人话就是 定位到东莞但是定位不到那个街区) catkin 会自己在这个地址下找这个“系统库”的 
+	12. 如果在我自己的工作空间 里面 source 那么我工作空间的 root层级地址 会插入CMAKE_PREFIX_PATH 的头部优先查找 
+	13. 人话就是 如果 一个代码要依赖 roscpp 刚好我在工作空间里改了 roscpp 我不想用系统的 roscpp  source 系统的setup.bash 再 source我自己工作空间 的setup.bash 那么 我工作空间的root层级地址就会插入 CMAKE_PREFIX_PATH 的头部 被优先查找
+	14. 那么 这个代码用到的就是 我自己改的 roscpp 了
