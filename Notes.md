@@ -402,7 +402,7 @@ b.cpp 中guide() 函数找不到 b.o中就会把guide()地址空出来等待 Lin
 	rosrun <包名> <节点名> 这个节点的运行会占用这个终端 你想运行其他节点得再开一个终端
 
    #### rosnode 
-	  rosnode list 将当前ros 运行的节点 都列出来
+	  rosnode list 将当前ros 运行的节点 都列出来s
 	  rosnode info <节点名称> 查看莫个节点的信息  Publish 了那些 topic Subscribe 了那些 topic 等信息
    #### rostopic 
 	  rostopic list 打印出ros 里所有的话题 
@@ -421,3 +421,17 @@ b.cpp 中guide() 函数找不到 b.o中就会把guide()地址空出来等待 Lin
 	  rosmsg geometry_msgs/Twist 查看 geometry_msgs/Twist 这个Message 的模板
    #### rosservice
 	  rosservice list 打印出当前 Master 已注册的 service 名称
+	  rosservice call <服务名> <Message 结构>  调用<服务名>service 并获得 reply
+	  rosservice call /swamp "x: 2.0 y: 2.0 theta:0.0 name 'turrle2' " 给turtlesim 发一个Request 然后让它 reply
+   ####	rqt_graph  
+		rqt_graph 图形化查看节点 和节点之间的联系 （比如两节点之间有一个topic）
+   #### rosbag (!!!!!)
+		rosbag record -a -O cmd_record   记录系统的所有数据 -a的意思是all -O cmd_record 的意思是 将系统的数据都放在 cmd_record 里 （注意，如果没有写路径就默认放在终端所在的文件夹里）
+		rosbag record -a -O /root/catkin_ws/cmd_record.bag 最好把cmd_record.bag 放在挂载点上 (宿主看得见) 注意写绝对路径
+
+		工作原理: subscribe 所有的topic 加上时间戳 写入 cmd_record.bag 里面  在play 开始的时候 将 cmd_record.bag 里面的message pub 到各个topic 上
+		还有： play 的时候 如果有节点在向 topic 同时发消息 topic 遵从先到先发的原则 虽然只有一条信息通道 会按顺序将俩方的message 发出去
+
+### ROS 中的工作空间
+   #### 工作空间的 结构
+		src : 放置所有的源码 
