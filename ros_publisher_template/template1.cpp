@@ -1,11 +1,12 @@
 # include <ros/ros.h>  // 包含了ros命名空间  还有里面的自由 函数 如 ros:: init()
-# include <geometry_msg/Twist.h> 其实.h 文件才是c++语言 Twist 是 geometry包里面的一个 Twist.msg 文件格式 只不过catkin 在编译时 将 Twist.msg 写成了 c++的结构体 Twist 放在了 Twist.h 这个文件里面  这里个代码里的 Twist 都是一个结构体
+# include <geometry_msgs/Twist.h> 其实.h 文件才是c++语言 Twist 是 geometry包里面的一个 Twist.msg 文件格式 只不过catkin 在编译时 将 Twist.msg 写成了 c++的结构体 Twist 放在了 Twist.h 这个文件里面  这里个代码里的 Twist 都是一个结构体
 
 int main(int argc, char **argv)  //atgc 这个是什么呢 这个记录了 终端在调用这个节点时的 字符个数
                                  //atgv 这个是一个字符串数组 记录了终端在调用这个节点时的 字符串内容
                                  // 比如 终端输入 rosrun learning_topic turtle_publisher 这个命令时 argc 就是3  
                                  //argv[0] 就是 “rosrun“ argv[1] 就是 “learning_topic“ argv[2] 就是 “turtle_publisher“
-
+                                 //turrle_publisher 是在Master 注册的节点名字 和rosrun 可执行的binary 文件名没有关联
+                                 //注意catkin 生成的可执行binary 文件名一般和 .cpp的文件名一样
 {
 
     ros_init(argc,argv,"turtle_publisher"); //首先roscpp 这个库是一个整个ros系统都可以调用的全局函数库
