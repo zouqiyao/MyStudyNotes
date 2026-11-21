@@ -469,4 +469,57 @@ b.cpp 中guide() 函数找不到 b.o中就会把guide()地址空出来等待 Lin
 	 4. 然而 每一个节点都需要向 ros Master 注册
 	 5. 所以每次我运行一个 代码 代码内部都要包含 向 ros Master 注册的程序 
 	 6. 我甚至可以将这个代码运行两次 这样就有两个节点啦! （注意重名的问题）rosMaster 可能会将前一个一样名字的节点踢出
+
+   #### 定制你的个人的消息库!
+   1. 定义msg 文件 Person.msg
+   ```
+	 string name 
+	 uint8 age
+	 uint8 sex
+
+	 uint8 unknown = 0
+	 uint8 male = 1
+	 uint8 female = 2
+   ``` 
+   2. 这是 msg 的原始数据 ros 会将它编译成 c++ 的 .h 文件
+   ```cpp  Person.h
+	struct
+	{
+		string name;
+		unsigned int age;
+		unsigned int sex;
+
+		enum{
+			unknown = 0,
+			male,
+			female
+		}
+	}
+   ```
+   3. 在package.xml 里面声明功能包依赖
+   <build_depend>message_generation</build_depend>
+   <exec_depend>message_runtime</exec_depend>
+
+   4. 在CMakeLists.txt添加编译选项
+   find_package( .... message_generation) //拿到生成工具
+   add_msg_files(FILES Person.msg)  //登记 Person.msg 告诉generation 我这个文件要转化成 .h
+   generate_messages(DEPENDENCIES std_msgs) // 开始转化命令 DEPENDENCIES std_msgs
+										    // 的意思是 如果我的msg 里用到了 std_msgs 库里面的类型 确保这个类型已经被转化好了
+
+   catkin_package(.... message_runtime)  //对外声明 依赖我这个包的其他包 也要依赖message_runtime 这个库链接
+
+
+ #### Parameter
+	1. Master 会 有一个全局的参数 列表
+	2. 这个列表所有节点都可以看到
+
+	```
+	应用ros 命令
+	rosparam list //列出当前参数
+	rosparam get /param_key               //列出名为param_key 的参数的值
+	rosparam set /param_ket n             //修改这个param_key 的值
+	rosparam dump param.yaml              // 将当前的参数列表 打包成一个 param.yaml 放在主文件目录下   .yaml 文件格式是 /param_key + parameter value
+	rosparam delet /param_key             //删除某个参数
+	rosparam load param.yaml              //加载这个文件进入 Master
+    ```
 	

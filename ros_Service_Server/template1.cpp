@@ -10,7 +10,7 @@ bool commandCallBack(std_srvs::Trigger::Request &req,std_srvs::Trigger::Response
                     //Trigger 包含了一个 request 结构体 和一个 response 结构体
                     //request 结构体是 Client 填好的请求的数据 比如说 Turtlesim::Spawn srv  srv.request.x = 1.0; srv.request.y = 0.2; 这里就写好了request 再通过 .call() 传过来
                     //resopnse 就是要传回去Client 的数据 比如说: response.name = "turtle2" Client 就可以受到一个 string 意思是turtle创建成功名字是 "turtle2"
-                    
+                    //你会发现这个commandCallBack()是 bool 当它返会 true res才会被传回去Client
         
 {
     pubcommand = !pubcommand; //受到一次call()就变换一次运动年状态

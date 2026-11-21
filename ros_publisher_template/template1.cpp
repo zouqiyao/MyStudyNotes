@@ -9,7 +9,7 @@ int main(int argc, char **argv)  //atgc 这个是什么呢 这个记录了 终�
                                  //注意catkin 生成的可执行binary 文件名一般和 .cpp的文件名一样
 {
 
-    ros_init(argc,argv,"turtle_publisher"); //首先roscpp 这个库是一个整个ros系统都可以调用的全局函数库
+    ros::init(argc,argv,"turtle_publisher"); //首先roscpp 这个库是一个整个ros系统都可以调用的全局函数库
                                             //"运行状态" 就是 在节点运行起来以后 roscpp里面的函数在内存里 维护的 一堆全局变量 
                                             // 这些全局变量 对于当前进程是可见的 对于其他进程（跑起来的节点）是不可见的
 
