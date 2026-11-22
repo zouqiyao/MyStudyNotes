@@ -704,14 +704,26 @@ int main(int argc, char **argv)
    <build_depend>message_generation</build_depend>
    <exec_depend>message_runtime</exec_depend>
 
+   这个message_runtime 是什么东西呢》》
+   在节点要发送数据的时候 网端的数据格式是字节流 message_generation 已经将msg 文件编译成了 Person.h 的c++类型了
+   但是我们在代码里面写 pubish(自定义数据)在节点运行的时候 网络端需要将 这个c++ 类型的数据转成 字节流
+   那要一些工具 这些工具都散落在不同的包里面
+   message_runtime 做的事情就是 用它的package.xml 文件 将这些包都包含进来
+   我们只需要 包含一个 message_runtime 就好了
+
+    注意事项：：：：
+    ```cpp
+    Srv类型::Respone arv; //这样写是合法的， arv 的类型就是message类型的子类Respone ..
+    //为啥要这样写 直接一个namespace 不就好了吗... 
+    //是因为advertise  需要一个类型...  n.advertise<myemssage/Upoint>("/cmd_vel",10); 
+    ```
    4. 在CMakeLists.txt添加编译选项
    find_package( .... message_generation) //拿到生成工具
    add_msg_files(FILES Person.msg)  //登记 Person.msg 告诉generation 我这个文件要转化成 .h
    generate_messages(DEPENDENCIES std_msgs) // 开始转化命令 DEPENDENCIES std_msgs
 										    // 的意思是 如果我的msg 里用到了 std_msgs 库里面的类型 确保这个类型已经被转化好了
 
-   catkin_package(.... message_runtime)  //对外声明 依赖我这个包的其他包 也要依赖message_runtime 这个库链接
-
+   catkin_package(.... message_runtime)  //对外声明 依赖我这个包的其他包 也要依赖message_runtime 这个库链接.
 
  #### Parameter
 	1. Master 会 有一个全局的参数 列表
@@ -1095,3 +1107,14 @@ controllers.yaml  →  参数服务器  →  控制器 init() 读名字  →  ge
 7. 让控制器读取私有成员 根据这个私有成员进行计算 要给轮子的力矩
 
 8. 必须加锁 因为.. 同时会有两个线程需要同一个数据  第一个是update()要读  第二个是回调要写 所以一定得第一个做好了第二个才可以做
+
+### 对于Master 的命名空间管理
+1. 在我们向Master 申请句柄 ros:: NodeHandle n 的时候Master 会给你一个全局权限，你可以看到所有的topic Service
+2. 在全局权限下 你发布的 topic 和  Service 就不会带上任何前缀 你也可以订阅所有的topic 和 call 所有的 Service
+3. ros::NodeHandle n("turtle")  现在你申请的句柄就不是全局权限的了 你只能订阅 /turtle/ 里面的 topic Service 
+5. 比如: ros::Subscriber mysub = n.subscribe("cmd_vel",10,callback) 现在订阅的topic 就是 /turtle/cmd_vel 
+6. 在发出topic 和 Service 的时候 也是一样的 
+7. ros:: Publisher mypub = n.advertise<geometry_msgs::Twist>("cmd_vel",10) 因为mypub 的权限只有在/turtle 下
+8. 所以在全局权限下 我们看到的 就是 /turtle/cmd_vel了
+9. ros::NodeHandle n_turtle(n); 这样就继承 了 n 的权限 也只能访问 "/turtle" 以下的东西了
+10. ros::NodeHandle n_turtle(n,"twist"); 继承了 n 的权限 并且下放一层 它只能访问 "/turle/twist" 以下的东西了
